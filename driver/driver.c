@@ -14,6 +14,7 @@
 #include <linux/sched/signal.h>
 #include <linux/netdevice.h>
 #include <linux/device.h>
+#include <linux/pci.h>
 
 #define BUF_SIZE 1024
 
@@ -47,24 +48,17 @@ static struct file_operations  proc_fops = {
 };
 
 // net_device
-static size_t write_net_device_struct(char __user *ubuf){
+static size_t write_pci_device_struct(char __user *ubuf){
     char buf[BUF_SIZE];
     size_t len = 0;
 
-    static struct net_device *dev;
+    static struct pci_dev* dev;
 
-    read_lock(&dev_base_lock);
 
-    dev = first_net_device(&init_net);
-    while(dev){
-        len += sprintf(buf+len, "found [%s]\n",     dev->name);
-        len += sprintf(buf+len, "base_addr = %ld\n", dev->base_addr);
-        len += sprintf(buf+len, "mem_start = %ld\n", dev->mem_start);
-        len += sprintf(buf+len, "mem_end = %ld\n\n", dev->mem_end);
-        dev = next_net_device(dev);
+    while((dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev))){
+        len += sprintf(buf+len, "pci found [%d]\n",     dev->device);
     }
 
-    read_unlock(&dev_base_lock);
 
     if (copy_to_user(ubuf, buf, len)){
         return -EFAULT;
@@ -124,7 +118,7 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
     switch(struct_id){
         default:
         case 0:
-            len = write_net_device_struct(ubuf);
+            len = write_pci_device_struct(ubuf);
             break;
         case 1:
             len = write_signal_struct(ubuf, task_struct_ref);

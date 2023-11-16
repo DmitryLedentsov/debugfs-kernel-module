@@ -1,1 +1,0 @@
-cmd_/home/ledentd/lab2/lab_2/driver/driver.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/ledentd/lab2/lab_2/driver/driver.ko /home/ledentd/lab2/lab_2/driver/driver.o /home/ledentd/lab2/lab_2/driver/driver.mod.o;  true
