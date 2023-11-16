@@ -1,0 +1,1 @@
+cmd_/home/ledentd/lab2/lab_2/driver/Module.symvers := sed 's/\.ko$$/\.o/' /home/ledentd/lab2/lab_2/driver/modules.order | scripts/mod/modpost -m -a  -o /home/ledentd/lab2/lab_2/driver/Module.symvers -e -i Module.symvers   -T -
