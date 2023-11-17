@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
 
     char inbuf[4096];
     char outbuf[4096];
-    int fd = open("/proc/lab/struct_info", O_RDWR);
+    int fd = open("/sys/kernel/debug/lab/struct_info", O_RDWR);
     sprintf(inbuf, "%s %s", argv[1], argv[2]);
 
     write(fd, inbuf, 17);

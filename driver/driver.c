@@ -54,9 +54,10 @@ static size_t write_pci_device_struct(char __user *ubuf){
 
     static struct pci_dev* dev;
 
-
+    //read_lock(&dev_base_lock);
     while((dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev))){
         len += sprintf(buf+len, "pci found [%d]\n",     dev->device);
+        printk(KERN_INFO "pci found [%d]\n", dev->device);
     }
 
 
