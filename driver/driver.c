@@ -69,7 +69,7 @@ static size_t write_pci_device_struct(char __user *ubuf){
 }
 
 // signal_struct
-static size_t write_signal_struct(char __user *ubuf, struct task_struct *task_struct_ref){
+static size_t write_fpu_state_struct(char __user *ubuf, struct task_struct *task_struct_ref){
     char buf[BUF_SIZE];
     size_t len = 0;
 
@@ -77,6 +77,7 @@ static size_t write_signal_struct(char __user *ubuf, struct task_struct *task_st
 
     //len += sprintf(buf,     "live = %d\n",                  atomic_read(&(signalStruct->live)));
     len += sprintf(buf+len, "size = %d\n", fpu_state->size);
+    //TODO: finish
 
     if (copy_to_user(ubuf, buf, len)){
         return -EFAULT;
@@ -116,7 +117,7 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
             len = write_pci_device_struct(ubuf);
             break;
         case 1:
-            len = write_signal_struct(ubuf, task_struct_ref);
+            len = write_fpu_state_struct(ubuf, task_struct_ref);
             break;
     }
 
