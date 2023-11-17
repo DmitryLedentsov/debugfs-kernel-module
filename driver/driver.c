@@ -73,16 +73,10 @@ static size_t write_signal_struct(char __user *ubuf, struct task_struct *task_st
     char buf[BUF_SIZE];
     size_t len = 0;
 
-    struct signal_struct *signalStruct = task_struct_ref->signal;
+    struct fpstate* fpu_state = task_struct_ref->thread.fpu.fpstate;
 
-    len += sprintf(buf,     "live = %d\n",                  atomic_read(&(signalStruct->live)));
-    len += sprintf(buf+len, "nr_threads = %d\n",            signalStruct->nr_threads);
-    len += sprintf(buf+len, "group_exit_code = %d\n",       signalStruct->group_exit_code);
-    len += sprintf(buf+len, "notify_count = %d\n",          signalStruct->notify_count);
-    len += sprintf(buf+len, "group_stop_count = %d\n",      signalStruct->group_stop_count);
-    len += sprintf(buf+len, "flags = %d\n",                 signalStruct->flags);
-    len += sprintf(buf+len, "is_child_subreaper = %d\n",    signalStruct->is_child_subreaper);
-    len += sprintf(buf+len, "has_child_subreaper = %d\n",   signalStruct->has_child_subreaper);
+    //len += sprintf(buf,     "live = %d\n",                  atomic_read(&(signalStruct->live)));
+    len += sprintf(buf+len, "size = %d\n", fpu_state->size);
 
     if (copy_to_user(ubuf, buf, len)){
         return -EFAULT;
