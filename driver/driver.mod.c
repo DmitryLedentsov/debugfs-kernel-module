@@ -33,10 +33,10 @@ __used __section("__versions") = {
 	{ 0xa6f09f89, "debugfs_create_dir" },
 	{ 0xfc9a7dad, "get_pid_task" },
 	{ 0x92c2541e, "find_get_pid" },
-	{ 0x3c3ff9fd, "sprintf" },
 	{ 0x56470118, "__warn_printk" },
-	{ 0x6b10bee1, "_copy_to_user" },
 	{ 0xa5d25c36, "pci_get_device" },
+	{ 0x6b10bee1, "_copy_to_user" },
+	{ 0x3c3ff9fd, "sprintf" },
 	{ 0xd0da656b, "__stack_chk_fail" },
 	{ 0xcbd4898c, "fortify_panic" },
 	{ 0xa916b694, "strnlen" },
@@ -51,4 +51,4 @@ __used __section("__versions") = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "DD548BEE00FF3B61220955C");
+MODULE_INFO(srcversion, "099D8E9783875E95CB5E004");
