@@ -6,12 +6,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdio.h> 
 
 void help(){
     fprintf(stderr, "Usage: ./user structure_ID PID\n "
                     "Supported structures ID: \n "
-                    "0 - net_device\n "
-                    "1 - signal_struct\n");
+                    "0 - pci device\n "
+                    "1 - fpu state\n");
 }
 
 int main(int argc, char *argv[]){
@@ -59,14 +60,39 @@ int main(int argc, char *argv[]){
     sprintf(inbuf, "%s %s", argv[1], argv[2]);
 
     write(fd, inbuf, 17);
-    lseek(fd, 0, SEEK_SET);
+    //lseek(fd, 0, SEEK_SET);
     read(fd, outbuf, 4096);
 
     if (structure_ID == 0){
-        printf("net_device structure: \n\n");
+        printf("pci_device structure: \n\n");
     } else {
-        printf("signal_struct structure data for PID %ld: \n\n", PID);
+        printf("fpu state structure data for PID %ld: \n\n", PID);
     }
-    puts(outbuf);
+    //puts(outbuf);//TODO: dsg
+
+    FILE *fptr; 
+  
+    char c; 
+
+  
+    // Open file 
+    fptr = fopen("/sys/kernel/debug/lab/struct_info", "r"); 
+    
+    if (fptr == NULL) 
+    { 
+        printf("Cannot open file debug \n"); 
+        exit(0); 
+    } 
+    //fprintf(fptr, "%s %s", argv[1], argv[2]);
+  
+    // Read contents from file 
+    c = fgetc(fptr); 
+    while (c != EOF) 
+    { 
+        printf ("%c", c); 
+        c = fgetc(fptr); 
+    } 
+  
+    fclose(fptr); 
     return 0;
 }

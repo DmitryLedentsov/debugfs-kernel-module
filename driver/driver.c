@@ -35,16 +35,20 @@ static int      __init lab_driver_init(void);
 static void     __exit lab_driver_exit(void);
 
 
-/***************** Procfs Functions *******************/
+/***************** devugfs Functions *******************/
 static ssize_t  read_debug(struct file *filp, char __user *buffer, size_t length,loff_t * offset);
 static ssize_t  write_debug(struct file *filp, const char *buff, size_t len, loff_t * off);
+static int      open_debug(struct inode *inode, struct file *file);
+static int      release_debug(struct inode *inode, struct file *file);
 
 /*
-** procfs operation sturcture
+** debugfs operation sturcture
 */
 static struct file_operations  proc_fops = {
         .read = read_debug,
         .write = write_debug,
+        .open = open_debug, 
+        .release = release_debug
 };
 
 // net_device
@@ -57,6 +61,14 @@ static size_t write_pci_device_struct(char __user *ubuf){
     //read_lock(&dev_base_lock);
     while((dev = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev))){
         len += sprintf(buf+len, "pci found [%d]\n",     dev->device);
+        //len += sprintf(buf+len, "name = %ld\n", dev->dev.init_name);
+        //len += sprintf(buf+len, "type = %ld\n", dev->dev.type->name);
+
+        len += sprintf(buf+len, "vendor = %ld\n", dev->vendor);
+        len += sprintf(buf+len, "devfn = %ld\n", dev->devfn);
+        len += sprintf(buf+len, "class = %ld\n", dev->class);
+        len += sprintf(buf+len, "\n");
+        
         printk(KERN_INFO "pci found [%d]\n", dev->device);
     }
 
@@ -68,15 +80,25 @@ static size_t write_pci_device_struct(char __user *ubuf){
     return len;
 }
 
-// signal_struct
+// fpu_struct
 static size_t write_fpu_state_struct(char __user *ubuf, struct task_struct *task_struct_ref){
     char buf[BUF_SIZE];
     size_t len = 0;
 
     struct fpstate* fpu_state = task_struct_ref->thread.fpu.fpstate;
 
+    //len += sprintf(buf+len, "pid = %d\n", pid);
     //len += sprintf(buf,     "live = %d\n",                  atomic_read(&(signalStruct->live)));
     len += sprintf(buf+len, "size = %d\n", fpu_state->size);
+    len += sprintf(buf+len, "user_size = %d\n", fpu_state->user_size);
+    len += sprintf(buf+len, "xfeatures = %d\n", fpu_state->xfeatures);
+    len += sprintf(buf+len, "user_xfeatures = %d\n", fpu_state->user_xfeatures);
+    len += sprintf(buf+len, "xfd = %d\n", fpu_state->xfd);
+    len += sprintf(buf+len, "is_valloc = %d\n", fpu_state->is_valloc);
+    len += sprintf(buf+len, "is_guest = %d\n", fpu_state->is_guest);
+    len += sprintf(buf+len, "is_confidential = %d\n", fpu_state->is_confidential);
+    len += sprintf(buf+len, "in_use = %d\n", fpu_state->in_use);
+
     //TODO: finish
 
     if (copy_to_user(ubuf, buf, len)){
@@ -86,9 +108,21 @@ static size_t write_fpu_state_struct(char __user *ubuf, struct task_struct *task
     return len;
 }
 
+static int open_debug(struct inode *inode, struct file *file)
+{
+    printk(KERN_INFO "debug file opened.....\t");
+    return 0;
+}
+
+static int release_debug(struct inode *inode, struct file *file)
+{
+    printk(KERN_INFO "debug file released.....\n");
+    return 0;
+}
+
 
 /*
-** Эта фануция будет вызвана, когда мы ПРОЧИТАЕМ файл procfs
+** Эта фануция будет вызвана, когда мы ПРОЧИТАЕМ файл debugfs
 */
 static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, loff_t *ppos) {
 
@@ -96,7 +130,7 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
     int len = 0;
     struct task_struct *task_struct_ref = get_pid_task(find_get_pid(pid), PIDTYPE_PID);
     
-    printk(KERN_INFO "proc file read.....\n");
+    printk(KERN_INFO "debug file read.....\n");
     if (*ppos > 0 || count < BUF_SIZE){
         return 0;
     }
@@ -126,14 +160,14 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
 }
 
 /*
-** Эта фануция будет вызвана, когда мы ЗАПИШЕМ в файл procfs
+** Эта фануция будет вызвана, когда мы ЗАПИШЕМ в файл debug
 */
 static ssize_t write_debug(struct file *filp, const char __user *ubuf, size_t count, loff_t *ppos) {
 
     int num_of_read_digits, c, a, b;
     char buf[BUF_SIZE];
     
-    printk(KERN_INFO "proc file wrote.....\n");
+    printk(KERN_INFO "debug file wrote.....\n");
 
     if (*ppos > 0 || count > BUF_SIZE){
         return -EFAULT;
@@ -160,12 +194,12 @@ static ssize_t write_debug(struct file *filp, const char __user *ubuf, size_t co
 ** Функция инициализации Модуля
 */
 static int __init lab_driver_init(void) {
-    /* Создание директории процесса. Она будет создана в файловой системе "/proc" */
+    /* Создание директории процесса. Она будет создана в файловой системе "/debug" */
     parent = debugfs_create_dir("lab",NULL);
 
     if( parent == NULL )
     {
-        printk("Error creating proc entry");
+        printk("Error creating debug entry");
         return -1;
     }
 

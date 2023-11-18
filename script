@@ -1,3 +1,4 @@
+sudo chmod o+rx /sys/kernel/debug
 cd ~/lab2/lab_2/driver
 sudo insmod driver.ko
 echo "#### Driver Loaded ####"
@@ -22,9 +23,8 @@ echo "./usermod 1 14"
 #./usermod 0 1
 
 echo "#### Contents of the 'struct_info' file ####"
-sudo chmod o+rx /sys/kernel/debug
-cd /sys/kernel/debug/lab
-cat struct_info
+#cd /sys/kernel/debug/lab
+cat /sys/kernel/debug/lab/struct_info
 
 
 # dmesg
