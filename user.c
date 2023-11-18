@@ -14,7 +14,7 @@ void help(){
                     "0 - pci device\n "
                     "1 - fpu state\n");
 }
-
+#define DEBUG_PATH "/sys/kernel/debug/lab/struct_info"
 int main(int argc, char *argv[]){
     if (argc != 3) help();
     if (argc < 3){
@@ -28,6 +28,7 @@ int main(int argc, char *argv[]){
 
     char *p;
     errno = 0;
+    
     long structure_ID = strtol(argv[1], &p, 10);
     if (*p != '\0' || errno != 0){
         fprintf(stderr, "Provided structure_ID must be number.\n");
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]){
 
     char inbuf[4096];
     char outbuf[4096];
-    int fd = open("/sys/kernel/debug/lab/struct_info", O_RDWR);
+    int fd = open(DEBUG_PATH, O_RDWR);
     sprintf(inbuf, "%s %s", argv[1], argv[2]);
 
     write(fd, inbuf, 17);
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]){
 
   
     // Open file 
-    fptr = fopen("/sys/kernel/debug/lab/struct_info", "r"); 
+    fptr = fopen(DEBUG_PATH, "r"); 
     
     if (fptr == NULL) 
     { 
