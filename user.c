@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 
     write(fd, inbuf, 17);
     //lseek(fd, 0, SEEK_SET);
-    read(fd, outbuf, 4096);
+    //read(fd, outbuf, 4096);
 
     if (structure_ID == 0){
         printf("pci_device structure: \n\n");
