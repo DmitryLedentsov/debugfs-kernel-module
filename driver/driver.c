@@ -22,7 +22,7 @@
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("Stab linux module for operating system's lab");
 MODULE_VERSION("1.0");
-DEFINE_RWLOCK(ht_rwlock);
+static DEFINE_MUTEX(rw_mutex);
 
 static int pid = 1;
 static int struct_id = 1;
@@ -46,7 +46,7 @@ static int      release_debug(struct inode *inode, struct file *file);
 /*
 ** debugfs operation sturcture
 */
-static struct file_operations  proc_fops = {
+static struct file_operations  debug_fops = {
         .read = read_debug,
         .write = write_debug,
         .open = open_debug, 
@@ -112,12 +112,18 @@ static size_t write_fpu_state_struct(char __user *ubuf, struct fpstate *fpu_stat
 
 static int open_debug(struct inode *inode, struct file *file)
 {
+    if (!mutex_trylock(&rw_mutex)) {
+        printk(KERN_ALERT "driver is in use, but will still go on.");
+        // FIXME: If we want the mutex lock to work well, need to return -EBUSY
+    //    return -EBUSY;
+    }
     printk(KERN_INFO "debug file opened.....\t");
     return 0;
 }
 
 static int release_debug(struct inode *inode, struct file *file)
 {
+    mutex_unlock(&rw_mutex);
     printk(KERN_INFO "debug file released.....\n");
     return 0;
 }
@@ -148,8 +154,6 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
         return len;
     }
 
-    //blocking mode
-    write_lock(&ht_rwlock);
     switch(struct_id){
         default:
         case 0:
@@ -160,8 +164,6 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
             len = write_fpu_state_struct(ubuf, state);
             break;
     }
-    //unlock
-    write_unlock(&ht_rwlock);
 
     *ppos = len;
     return len;
@@ -213,9 +215,10 @@ static int __init lab_driver_init(void) {
         return -1;
     }
 
-    /* Создание записи процесса в разделе "/proc/lab/" */
-    debugfs_create_file("struct_info", 0666, parent, &filevalue, &proc_fops);
 
+    /* Создание записи процесса в разделе "/debugfs/lab/" */
+    debugfs_create_file("struct_info", 0666, parent, &filevalue, &debug_fops);
+    mutex_init(&rw_mutex);
     printk("Device Driver Insert...Done!!!\n");
     return 0;
 }
