@@ -31,6 +31,7 @@ __used __section("__versions") = {
 	{ 0xb4ecd821, "debugfs_remove" },
 	{ 0x3d5145a7, "debugfs_create_file" },
 	{ 0xa6f09f89, "debugfs_create_dir" },
+	{ 0xe68efe41, "_raw_write_lock" },
 	{ 0xfc9a7dad, "get_pid_task" },
 	{ 0x92c2541e, "find_get_pid" },
 	{ 0x56470118, "__warn_printk" },
@@ -51,4 +52,4 @@ __used __section("__versions") = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "099D8E9783875E95CB5E004");
+MODULE_INFO(srcversion, "DA5AC7592E478B7F9DAAA58");

@@ -16,11 +16,13 @@
 #include <linux/device.h>
 #include <linux/pci.h>
 
+
 #define BUF_SIZE 1024
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("Stab linux module for operating system's lab");
 MODULE_VERSION("1.0");
+DEFINE_RWLOCK(ht_rwlock);
 
 static int pid = 1;
 static int struct_id = 1;
@@ -128,6 +130,7 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
 
     char buf[BUF_SIZE];
     int len = 0;
+
     struct task_struct *task_struct_ref = get_pid_task(find_get_pid(pid), PIDTYPE_PID);
     
     printk(KERN_INFO "debug file read.....\n");
@@ -145,6 +148,8 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
         return len;
     }
 
+    //blocking mode
+    write_lock(&ht_rwlock);
     switch(struct_id){
         default:
         case 0:
@@ -155,6 +160,8 @@ static ssize_t read_debug(struct file *filp, char __user *ubuf, size_t count, lo
             len = write_fpu_state_struct(ubuf, state);
             break;
     }
+    //unlock
+    write_unlock(&ht_rwlock);
 
     *ppos = len;
     return len;
@@ -167,7 +174,8 @@ static ssize_t write_debug(struct file *filp, const char __user *ubuf, size_t co
 
     int num_of_read_digits, c, a, b;
     char buf[BUF_SIZE];
-    
+   
+
     printk(KERN_INFO "debug file wrote.....\n");
 
     if (*ppos > 0 || count > BUF_SIZE){
@@ -188,6 +196,7 @@ static ssize_t write_debug(struct file *filp, const char __user *ubuf, size_t co
 
     c = strlen(buf);
     *ppos = c;
+
     return c;
 }
 
