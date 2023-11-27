@@ -70,6 +70,8 @@ int main(int argc, char *argv[]){
         printf("fpu state structure data for PID %ld: \n\n", PID);
     }
     //puts(outbuf);//TODO: dsg
+    close(fd);
+
 
     FILE *fptr; 
   

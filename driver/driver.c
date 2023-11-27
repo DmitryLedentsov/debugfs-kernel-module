@@ -15,6 +15,7 @@
 #include <linux/netdevice.h>
 #include <linux/device.h>
 #include <linux/pci.h>
+#include <linux/mutex.h>
 
 
 #define BUF_SIZE 1024
@@ -22,6 +23,7 @@
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("Stab linux module for operating system's lab");
 MODULE_VERSION("1.0");
+#define MUTEX 1
 static DEFINE_MUTEX(rw_mutex);
 
 static int pid = 1;
@@ -113,7 +115,7 @@ static size_t write_fpu_state_struct(char __user *ubuf, struct fpstate *fpu_stat
 static int open_debug(struct inode *inode, struct file *file)
 {
     if (!mutex_trylock(&rw_mutex)) {
-        printk(KERN_ALERT "driver is in use, but will still go on.");
+        printk(KERN_ALERT "file is in use, but will still go on.");
         // FIXME: If we want the mutex lock to work well, need to return -EBUSY
         return -EBUSY;
     }
@@ -233,6 +235,7 @@ static void __exit lab_driver_exit(void)
 
     /* Удяление полностью /proc/lab */
     debugfs_remove_recursive(parent);
+    mutex_destroy(&rw_mutex);
     
     printk("Device Driver Remove...Done!!!\n");
 }
