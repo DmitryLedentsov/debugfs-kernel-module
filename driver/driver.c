@@ -114,11 +114,7 @@ static size_t write_fpu_state_struct(char __user *ubuf, struct fpstate *fpu_stat
 
 static int open_debug(struct inode *inode, struct file *file)
 {
-    if (!mutex_trylock(&rw_mutex)) {
-        printk(KERN_ALERT "file is in use");
-        // FIXME: If we want the mutex lock to work well, need to return -EBUSY
-        return -EBUSY;
-    }
+    mutex_lock(&rw_mutex);
     printk(KERN_INFO "debug file opened.....\t");
     return 0;
 }
